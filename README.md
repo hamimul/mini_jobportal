@@ -80,3 +80,32 @@ mvn spring-boot:run
 
 5. Access the application at
    http://localhost:8080
+
+
+Usage Examples
+Posting a Job
+
+Log in as an employer
+Navigate to "Jobs" > "Post New Job"
+Fill out the job details including:
+
+Job title and location
+Required experience
+Required skills with importance ratings
+
+
+
+Finding Matching Candidates
+
+Navigate to a job posting
+Click on "View Matching Candidates"
+Review candidates ranked by match score
+Use filters to refine the search
+View detailed candidate profiles
+
+Employer Dashboard
+
+Log in as an employer
+View the "Employer Dashboard"
+See top-matching candidates across all job postings
+View statistics and performance metrics
