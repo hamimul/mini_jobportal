@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Home', ~{::div})}">
+<body>
+<div>
+    <div class="jumbotron bg-light p-5 rounded">
+        <h1 class="display-4">Welcome to Job Portal</h1>
+        <p class="lead">A simplified job portal that matches candidates to job postings based on skills, experience, and location.</p>
+        <hr class="my-4">
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">For Employers</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Post job openings and find the best matching candidates.</p>
+                        <a href="/employers" class="btn btn-primary">Employer Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">For Candidates</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Find job opportunities that match your skills and experience.</p>
+                        <a href="/candidates" class="btn btn-success">Candidate Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h2>Latest Job Postings</h2>
+            <hr>
+            <!-- This would typically be populated with actual data -->
+            <div class="list-group">
+                <a href="/jobs/1" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Senior Java Developer</h5>
+                        <small>New York</small>
+                    </div>
+                    <p class="mb-1">Tech Innovations</p>
+                    <small>5+ years experience required</small>
+                </a>
+                <a href="/jobs/2" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Front-end Developer</h5>
+                        <small>Chicago</small>
+                    </div>
+                    <p class="mb-1">Tech Innovations</p>
+                    <small>3+ years experience required</small>
+                </a>
+                <a href="/jobs/3" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Data Engineer</h5>
+                        <small>San Francisco</small>
+                    </div>
+                    <p class="mb-1">DataDrive Solutions</p>
+                    <small>4+ years experience required</small>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

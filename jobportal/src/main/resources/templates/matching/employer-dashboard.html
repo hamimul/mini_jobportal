@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Employer Dashboard', ~{::div})}">
+<body>
+<div>
+    <h1>Dashboard for <span th:text="${employer.companyName}"></span></h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Company Profile</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Company:</strong> <span th:text="${employer.companyName}"></span></p>
+                    <p><strong>Industry:</strong> <span th:text="${employer.industry}"></span></p>
+                    <p><strong>Contact:</strong> <span th:text="${employer.user.email}"></span></p>
+                    <p><strong>Posted Jobs:</strong> <span th:text="${employer.jobs.size()}"></span></p>
+                    <a th:href="@{'/employers/' + ${employer.userId} + '/edit'}" class="btn btn-outline-primary">Edit Profile</a>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a th:href="@{'/jobs/create'}" class="btn btn-success mb-2 w-100">Post New Job</a>
+                    <a th:href="@{'/jobs/employer/' + ${employer.userId}}" class="btn btn-outline-primary mb-2 w-100">View All Jobs</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Top Matching Candidates</h5>
+                </div>
+                <div class="card-body">
+                    <p>Here are the top candidates matching your job postings:</p>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Candidate</th>
+                                <th>Location</th>
+                                <th>Experience</th>
+                                <th>Match Score</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="match : ${topMatches}">
+                                <td th:text="${match.rank}"></td>
+                                <td th:text="${match.candidateName}"></td>
+                                <td th:text="${match.location}"></td>
+                                <td th:text="${match.yearsExperience} + ' years'"></td>
+                                <td th:text="${#numbers.formatDecimal(match.matchScore, 1, 2)}"></td>
+                                <td>
+                                    <a th:href="@{'/candidates/' + ${match.candidateId}}"
+                                       class="btn btn-sm btn-primary">View Profile</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h5 class="card-title mb-0">Recent Jobs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a th:each="job : ${employer.jobs}"
+                           th:href="@{'/jobs/' + ${job.id}}"
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1" th:text="${job.title}"></h5>
+                                <small th:text="${job.location}"></small>
+                            </div>
+                            <p class="mb-1">Required experience: <span th:text="${job.minExperience}"></span>+ years</p>
+                            <small>
+                                <a th:href="@{'/matching/jobs/' + ${job.id}}" class="btn btn-sm btn-info">
+                                    View Matches
+                                </a>
+                            </small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+/* Main styling */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    flex: 1;
+}
+
+/* Card styling */
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+/* Table styling */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Progress bar */
+.progress {
+    height: 20px;
+}
+
+.progress-bar {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+/* List group styling */
+.list-group-item-action:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Footer styling */
+.footer {
+    margin-top: auto;
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.35em 0.65em;
+}
+
+/* Page header styling */
+h1, h2, h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+h1 {
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 0.5rem;
+}
