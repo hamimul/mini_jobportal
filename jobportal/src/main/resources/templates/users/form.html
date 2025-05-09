@@ -1,10 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(${user.id} ? 'Edit User' : 'Create User', ~{::div})}">
 <body>
+<div>
+    <h1 th:text="${user.id} ? 'Edit User' : 'Create User'">Create/Edit User</h1>
 
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0" th:text="${user.id} ? 'Edit User Details' : 'Enter User Details'">User Form</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/users}" method="post" th:object="${user}">
+                <input type="hidden" th:field="*{id}" />
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="type" class="form-label">User Type</label>
+                    <select class="form-select" id="type" th:field="*{type}" required>
+                        <option value="">-- Select Type --</option>
+                        <option value="EMPLOYER">Employer</option>
+                        <option value="CANDIDATE">Candidate</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="/users" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>

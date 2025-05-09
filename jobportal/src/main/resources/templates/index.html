@@ -36,31 +36,17 @@
         <div class="col-md-12">
             <h2>Latest Job Postings</h2>
             <hr>
-            <!-- This would typically be populated with actual data -->
             <div class="list-group">
-                <a href="/jobs/1" class="list-group-item list-group-item-action">
+                <div th:if="${latestJobs.empty}" class="alert alert-info">
+                    No job postings available at the moment.
+                </div>
+                <a th:each="job : ${latestJobs}" th:href="@{'/jobs/' + ${job.id}}" class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Senior Java Developer</h5>
-                        <small>New York</small>
+                        <h5 class="mb-1" th:text="${job.title}">Job Title</h5>
+                        <small th:text="${job.location}">Location</small>
                     </div>
-                    <p class="mb-1">Tech Innovations</p>
-                    <small>5+ years experience required</small>
-                </a>
-                <a href="/jobs/2" class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Front-end Developer</h5>
-                        <small>Chicago</small>
-                    </div>
-                    <p class="mb-1">Tech Innovations</p>
-                    <small>3+ years experience required</small>
-                </a>
-                <a href="/jobs/3" class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1">Data Engineer</h5>
-                        <small>San Francisco</small>
-                    </div>
-                    <p class="mb-1">DataDrive Solutions</p>
-                    <small>4+ years experience required</small>
+                    <p class="mb-1" th:text="${job.employer.companyName}">Company Name</p>
+                    <small th:text="${job.minExperience} + '+ years experience required'">Experience required</small>
                 </a>
             </div>
         </div>
