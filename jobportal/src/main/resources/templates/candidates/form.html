@@ -1,10 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(${candidate.userId} ? 'Edit Candidate' : 'Create Candidate', ~{::div})}">
 <body>
+<div>
+    <h1 th:text="${candidate.userId} ? 'Edit Candidate' : 'Create Candidate'">Create/Edit Candidate</h1>
 
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0" th:text="${candidate.userId} ? 'Edit Candidate Details' : 'Enter Candidate Details'">Candidate Form</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/candidates}" method="post" th:object="${candidate}">
+                <input type="hidden" th:field="*{userId}" />
+
+                <div class="mb-3" th:if="${candidate.userId == null}">
+                    <label for="userId" class="form-label">User</label>
+                    <select class="form-select" id="userId" name="userId" required>
+                        <option value="">-- Select User --</option>
+                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name + ' (' + user.email + ')'}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" th:field="*{location}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="yearsExperience" class="form-label">Years of Experience</label>
+                    <input type="number" class="form-control" id="yearsExperience" th:field="*{yearsExperience}" min="0" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Skills</label>
+                    <div id="skillsContainer">
+                        <!-- Skills will be added dynamically -->
+                        <div th:each="skill, stat : *{skills}" class="row mb-2 skill-row">
+                            <div class="col-md-6">
+                                <select class="form-select skill-select" th:name="|skills[${stat.index}].skill.id|">
+                                    <option value="">-- Select Skill --</option>
+                                    <!-- You'll need to populate this from the controller -->
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" th:name="|skills[${stat.index}].proficiency|">
+                                    <option value="1">1 - Basic</option>
+                                    <option value="2">2 - Intermediate</option>
+                                    <option value="3">3 - Advanced</option>
+                                    <option value="4">4 - Expert</option>
+                                    <option value="5">5 - Master</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addSkill" class="btn btn-info btn-sm mt-2">Add Skill</button>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="/candidates" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const skillsContainer = document.getElementById('skillsContainer');
+        const addSkillBtn = document.getElementById('addSkill');
+
+        // Add skill row
+        addSkillBtn.addEventListener('click', function() {
+            const index = document.querySelectorAll('.skill-row').length;
+            const row = document.createElement('div');
+            row.className = 'row mb-2 skill-row';
+            row.innerHTML = `
+                    <div class="col-md-6">
+                        <select class="form-select skill-select" name="skills[${index}].skill.id" required>
+                            <option value="">-- Select Skill --</option>
+                            <!-- You'll need to fetch skills via AJAX or have them in a hidden element -->
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="skills[${index}].proficiency" required>
+                            <option value="1">1 - Basic</option>
+                            <option value="2">2 - Intermediate</option>
+                            <option value="3">3 - Advanced</option>
+                            <option value="4">4 - Expert</option>
+                            <option value="5">5 - Master</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
+                    </div>
+                `;
+            skillsContainer.appendChild(row);
+
+            // Fetch skills via AJAX
+            fetch('/api/skills')
+                .then(response => response.json())
+                .then(skills => {
+                    const select = row.querySelector('.skill-select');
+                    skills.forEach(skill => {
+                        const option = document.createElement('option');
+                        option.value = skill.id;
+                        option.textContent = skill.name;
+                        select.appendChild(option);
+                    });
+                });
+        });
+
+        // Remove skill row
+        skillsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-skill')) {
+                e.target.closest('.skill-row').remove();
+            }
+        });
+    });
+</script>
 </body>
 </html>

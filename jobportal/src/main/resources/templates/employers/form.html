@@ -1,10 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(${employer.userId} ? 'Edit Employer' : 'Create Employer', ~{::div})}">
 <body>
+<div>
+    <h1 th:text="${employer.userId} ? 'Edit Employer' : 'Create Employer'">Create/Edit Employer</h1>
 
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0" th:text="${employer.userId} ? 'Edit Employer Details' : 'Enter Employer Details'">Employer Form</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/employers}" method="post" th:object="${employer}">
+                <input type="hidden" th:field="*{userId}" />
+
+                <div class="mb-3" th:if="${employer.userId == null}">
+                    <label for="userId" class="form-label">User</label>
+                    <select class="form-select" id="userId" name="userId" required>
+                        <option value="">-- Select User --</option>
+                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name + ' (' + user.email + ')'}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="companyName" class="form-label">Company Name</label>
+                    <input type="text" class="form-control" id="companyName" th:field="*{companyName}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="industry" class="form-label">Industry</label>
+                    <input type="text" class="form-control" id="industry" th:field="*{industry}" required>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="/employers" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>

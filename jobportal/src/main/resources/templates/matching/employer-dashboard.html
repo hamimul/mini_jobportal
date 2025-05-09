@@ -38,7 +38,11 @@
                 <div class="card-body">
                     <p>Here are the top candidates matching your job postings:</p>
 
-                    <div class="table-responsive">
+                    <div th:if="${topMatches.empty}" class="alert alert-info">
+                        No matches found yet. Make sure you have added required skills to your job postings.
+                    </div>
+
+                    <div class="table-responsive" th:if="${!topMatches.empty}">
                         <table class="table table-hover">
                             <thead>
                             <tr>
@@ -56,7 +60,14 @@
                                 <td th:text="${match.candidateName}"></td>
                                 <td th:text="${match.location}"></td>
                                 <td th:text="${match.yearsExperience} + ' years'"></td>
-                                <td th:text="${#numbers.formatDecimal(match.matchScore, 1, 2)}"></td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             th:style="'width: ' + ${match.matchScore * 5} + '%'"
+                                             th:text="${#numbers.formatDecimal(match.matchScore, 1, 2)}">
+                                        </div>
+                                    </div>
+                                </td>
                                 <td>
                                     <a th:href="@{'/candidates/' + ${match.candidateId}}"
                                        class="btn btn-sm btn-primary">View Profile</a>
@@ -73,22 +84,47 @@
                     <h5 class="card-title mb-0">Recent Jobs</h5>
                 </div>
                 <div class="card-body">
-                    <div class="list-group">
+                    <div th:if="${employer.jobs.empty}" class="alert alert-info">
+                        You haven't posted any jobs yet. <a th:href="@{'/jobs/create'}" class="alert-link">Create your first job posting</a>.
+                    </div>
+
+                    <div class="list-group" th:if="${!employer.jobs.empty}">
                         <a th:each="job : ${employer.jobs}"
                            th:href="@{'/jobs/' + ${job.id}}"
                            class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1" th:text="${job.title}"></h5>
-                                <small th:text="${job.location}"></small>
+                                <h5 class="mb-1" th:text="${job.title}">Job Title</h5>
+                                <small th:text="${job.location}">Location</small>
                             </div>
                             <p class="mb-1">Required experience: <span th:text="${job.minExperience}"></span>+ years</p>
-                            <small>
-                                <a th:href="@{'/matching/jobs/' + ${job.id}}" class="btn btn-sm btn-info">
-                                    View Matches
-                                </a>
-                            </small>
+                            <div class="d-flex justify-content-between">
+                                <small>
+                                    <span th:each="skill : ${job.requiredSkills}" class="badge bg-info me-1" th:text="${skill.skill.name}">Skill</span>
+                                </small>
+                                <small>
+                                    <a th:href="@{'/matching/jobs/' + ${job.id}}" class="btn btn-sm btn-info">
+                                        View Matches
+                                    </a>
+                                </small>
+                            </div>
                         </a>
                     </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">Matching Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <p>This dashboard shows you the top candidates across all your job postings. The matching algorithm:</p>
+                    <ul>
+                        <li>Matches candidates with at least 60% of your required skills</li>
+                        <li>Weights the skills based on importance and proficiency</li>
+                        <li>Adds bonuses for location matches</li>
+                        <li>Considers the candidate's experience level</li>
+                    </ul>
+                    <p>For more detailed matches, visit individual job listings and click on "View Matches".</p>
                 </div>
             </div>
         </div>

@@ -1,10 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Candidate Profile', ~{::div})}">
 <body>
+<div>
+    <h1>Candidate Profile</h1>
 
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0" th:text="${candidate.user.name}">Candidate Name</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> <span th:text="${candidate.user.email}">email@example.com</span></p>
+                    <p><strong>Location:</strong> <span th:text="${candidate.location}">New York</span></p>
+                    <p><strong>Experience:</strong> <span th:text="${candidate.yearsExperience} + ' years'">5 years</span></p>
+                </div>
+                <div class="col-md-6">
+                    <h5>Skills</h5>
+                    <div th:if="${candidate.skills.empty}" class="alert alert-info">
+                        No skills added yet.
+                    </div>
+                    <div th:unless="${candidate.skills.empty}">
+                        <div class="mb-2" th:each="skill : ${candidate.skills}">
+                            <div class="d-flex justify-content-between">
+                                <span th:text="${skill.skill.name}">Skill Name</span>
+                                <div>
+                                    <div class="progress" style="width: 150px; height: 20px;">
+                                        <div class="progress-bar" role="progressbar"
+                                             th:style="'width: ' + ${skill.proficiency * 20} + '%'"
+                                             th:text="${skill.proficiency} + '/5'">
+                                            3/5
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a href="/candidates" class="btn btn-secondary">Back to List</a>
+                <div>
+                    <a th:href="@{'/candidates/' + ${candidate.userId} + '/edit'}" class="btn btn-warning">Edit</a>
+                    <a th:href="@{'/candidates/' + ${candidate.userId} + '/delete'}" class="btn btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this candidate?')">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matching Jobs Section -->
+    <h3>Matching Jobs</h3>
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Job Matches</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                To view jobs that match this candidate's skills and experience, use the matching feature.
+            </div>
+            <!-- This would be populated dynamically based on matching algorithm -->
+        </div>
+    </div>
+</div>
 </body>
 </html>
