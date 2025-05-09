@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Validation Error', ~{::div})}">
+<body>
+<div>
+  <div class="container mt-5">
+    <div class="card bg-warning">
+      <div class="card-header">
+        <h2 class="card-title">Validation Error</h2>
+      </div>
+      <div class="card-body">
+        <h3>There was a problem with your request</h3>
+        <div class="alert alert-warning">
+          <p><strong>Status:</strong> <span th:text="${status}">400</span></p>
+          <p><strong>Time:</strong> <span th:text="${timestamp}">Timestamp</span></p>
+          <p><strong>Path:</strong> <span th:text="${url}">URL</span></p>
+          <p><strong>Error:</strong> <span th:text="${exception.message}">Error Message</span></p>
+        </div>
+        <button class="btn btn-primary" onclick="window.history.back()">Go Back and Try Again</button>
+        <a href="/" class="btn btn-secondary">Go Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

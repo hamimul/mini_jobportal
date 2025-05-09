@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Not Found', ~{::div})}">
+<body>
+<div>
+  <div class="container mt-5">
+    <div class="card bg-warning">
+      <div class="card-header">
+        <h2 class="card-title">Resource Not Found</h2>
+      </div>
+      <div class="card-body">
+        <h3>The requested resource could not be found</h3>
+        <div class="alert alert-warning">
+          <p><strong>Status:</strong> <span th:text="${status}">404</span></p>
+          <p><strong>Time:</strong> <span th:text="${timestamp}">Timestamp</span></p>
+          <p><strong>Path:</strong> <span th:text="${url}">URL</span></p>
+          <p><strong>Details:</strong> <span th:text="${exception.message}">Error Message</span></p>
+        </div>
+        <a href="/" class="btn btn-primary">Go Home</a>
+        <button class="btn btn-secondary" onclick="window.history.back()">Go Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -136,3 +136,5 @@ tmp/
 
 # Node modules (if you use any JS tools)
 node_modules/
+/jobportal.log
+
