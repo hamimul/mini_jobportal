@@ -15,7 +15,7 @@ public class Candidate {
     private Long candidateId;
 
     @OneToOne
-    //@MapsId
+    @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 

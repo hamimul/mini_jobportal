@@ -31,7 +31,7 @@ public class JobService {
     }
 
     public List<Job> findByEmployerId(Long employerId) {
-        return jobRepository.findByEmployerUserId(employerId);
+        return jobRepository.findByEmployerEmployerId(employerId);
     }
 
     @Transactional

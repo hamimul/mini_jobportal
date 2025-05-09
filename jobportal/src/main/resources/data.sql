@@ -12,10 +12,10 @@ INSERT INTO users (name, email, type) VALUES
                                           ('Cloud Systems Inc', 'jobs@cloudsystems.com', 'EMPLOYER');
 
 -- Employers
-INSERT INTO employers (user_id, company_name, industry) VALUES
-                                                            (1, 'Tech Innovations', 'Software Development'),
-                                                            (2, 'DataDrive Solutions', 'Data Analytics'),
-                                                            (3, 'Cloud Systems Inc', 'Cloud Infrastructure');
+INSERT INTO employers (employer_id, user_id, company_name, industry) VALUES
+                                                                         (1, 1, 'Tech Innovations', 'Software Development'),
+                                                                         (2, 2, 'DataDrive Solutions', 'Data Analytics'),
+                                                                         (3, 3, 'Cloud Systems Inc', 'Cloud Infrastructure');
 
 -- Users (Candidates)
 INSERT INTO users (name, email, type) VALUES
@@ -26,12 +26,12 @@ INSERT INTO users (name, email, type) VALUES
                                           ('Robert Chen', 'robert.c@example.com', 'CANDIDATE');
 
 -- Candidates
-INSERT INTO candidates (user_id, location, years_experience) VALUES
-                                                                 (4, 'New York', 5),
-                                                                 (5, 'San Francisco', 3),
-                                                                 (6, 'New York', 7),
-                                                                 (7, 'Chicago', 2),
-                                                                 (8, 'San Francisco', 6);
+INSERT INTO candidates (candidate_id, user_id, location, years_experience) VALUES
+                                                                               (4, 4, 'New York', 5),
+                                                                               (5, 5, 'San Francisco', 3),
+                                                                               (6, 6, 'New York', 7),
+                                                                               (7, 7, 'Chicago', 2),
+                                                                               (8, 8, 'San Francisco', 6);
 
 -- Candidate Skills
 INSERT INTO candidate_skills (candidate_id, skill_id, proficiency) VALUES

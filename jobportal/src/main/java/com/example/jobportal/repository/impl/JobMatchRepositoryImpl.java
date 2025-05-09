@@ -30,11 +30,11 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
                 GROUP BY j.id, j.location, j.min_experience
             ),
             candidate_skills AS (
-                SELECT c.user_id AS candidate_id, u.name AS candidate_name, c.location,
+                SELECT c.candidate_id, u.name AS candidate_name, c.location,
                        c.years_experience, s.id AS skill_id, cs.proficiency, js.importance
                 FROM candidates c
                 JOIN users u ON c.user_id = u.id
-                JOIN candidate_skills cs ON c.user_id = cs.candidate_id
+                JOIN candidate_skills cs ON c.candidate_id = cs.candidate_id
                 JOIN skills s ON cs.skill_id = s.id
                 LEFT JOIN job_skills js ON s.id = js.skill_id AND js.job_id = :jobId
                 WHERE js.job_id = :jobId
@@ -107,12 +107,12 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
                 GROUP BY j.id, j.location, j.min_experience
             ),
             candidate_skills AS (
-                SELECT j.id AS job_id, c.user_id AS candidate_id, u.name AS candidate_name, 
+                SELECT j.id AS job_id, c.candidate_id, u.name AS candidate_name, 
                        c.location, c.years_experience, s.id AS skill_id, 
                        cs.proficiency, js.importance
                 FROM candidates c
                 JOIN users u ON c.user_id = u.id
-                JOIN candidate_skills cs ON c.user_id = cs.candidate_id
+                JOIN candidate_skills cs ON c.candidate_id = cs.candidate_id
                 JOIN skills s ON cs.skill_id = s.id
                 JOIN job_skills js ON s.id = js.skill_id
                 JOIN jobs j ON js.job_id = j.id
@@ -128,29 +128,29 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
             candidate_scores AS (
                 SELECT ms.job_id, ms.candidate_id, ms.candidate_name, ms.location, ms.years_experience,
                        ms.matched_skills,
-                       (ms.matched_skills * 1.0 / jr.total_required_skills) AS skill_coverage,
+                       CAST(ms.matched_skills AS DOUBLE) / CAST(jr.total_required_skills AS DOUBLE) AS skill_coverage,
                        ms.weighted_skill_score,
                        CASE WHEN ms.location = jr.job_location THEN 10 ELSE 0 END AS location_bonus,
                        CASE 
                            WHEN ms.years_experience < jr.min_experience 
-                           THEN (ms.years_experience * 1.0 / jr.min_experience) * 5
+                           THEN (CAST(ms.years_experience AS DOUBLE) / CAST(jr.min_experience AS DOUBLE)) * 5
                            ELSE 5
                        END AS experience_score
                 FROM matching_skills ms
                 JOIN job_requirements jr ON ms.job_id = jr.job_id
-                WHERE ms.matched_skills * 1.0 / jr.total_required_skills >= 0.6
+                WHERE CAST(ms.matched_skills AS DOUBLE) / CAST(jr.total_required_skills AS DOUBLE) >= 0.6
             ),
             final_scores AS (
                 SELECT job_id, candidate_id, candidate_name, location, years_experience,
                        (weighted_skill_score + location_bonus + experience_score) AS match_score,
                        RANK() OVER (PARTITION BY job_id 
-                                   ORDER BY (weighted_skill_score + location_bonus + experience_score) DESC) AS rank
+                                   ORDER BY (weighted_skill_score + location_bonus + experience_score) DESC) AS rank_num
                 FROM candidate_scores
             )
-            SELECT candidate_id, candidate_name, location, years_experience, match_score, rank
+            SELECT candidate_id, candidate_name, location, years_experience, match_score, rank_num
             FROM final_scores
-            WHERE rank <= :limit
-            ORDER BY job_id, rank
+            WHERE rank_num <= :limit
+            ORDER BY job_id, rank_num
             """;
 
         Query query = entityManager.createNativeQuery(sql);
@@ -196,11 +196,11 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
                 GROUP BY j.id, j.location, j.min_experience
             ),
             candidate_skills AS (
-                SELECT c.user_id AS candidate_id, u.name AS candidate_name, c.location,
+                SELECT c.candidate_id, u.name AS candidate_name, c.location,
                        c.years_experience, s.id AS skill_id, cs.proficiency, js.importance
                 FROM candidates c
                 JOIN users u ON c.user_id = u.id
-                JOIN candidate_skills cs ON c.user_id = cs.candidate_id
+                JOIN candidate_skills cs ON c.candidate_id = cs.candidate_id
                 JOIN skills s ON cs.skill_id = s.id
                 LEFT JOIN job_skills js ON s.id = js.skill_id AND js.job_id = :jobId
                 WHERE js.job_id = :jobId
@@ -259,7 +259,7 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
             SELECT candidate_id, candidate_name, location, years_experience, match_score, rank
             FROM final_scores
             ORDER BY rank
-            OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
+            LIMIT :limit OFFSET :offset
             """);
 
         Query query = entityManager.createNativeQuery(sqlBuilder.toString());

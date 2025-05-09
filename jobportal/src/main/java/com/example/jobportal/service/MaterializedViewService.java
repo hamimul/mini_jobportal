@@ -51,7 +51,7 @@ public class MaterializedViewService {
             // First, drop the existing table if it exists
             jdbcTemplate.execute("DROP TABLE IF EXISTS job_candidate_matches");
 
-            // Then create and populate the new table
+            // Then create and populate the new table - update to use employerId and candidateId
             jdbcTemplate.execute("""
                 CREATE TABLE job_candidate_matches AS
                 WITH job_requirements AS (
@@ -62,12 +62,12 @@ public class MaterializedViewService {
                     GROUP BY j.id, j.location, j.min_experience
                 ),
                 candidate_skills AS (
-                    SELECT j.id AS job_id, c.user_id AS candidate_id, u.name AS candidate_name, 
+                    SELECT j.id AS job_id, c.candidate_id, u.name AS candidate_name, 
                            c.location, c.years_experience, s.id AS skill_id, 
                            cs.proficiency, js.importance
                     FROM candidates c
                     JOIN users u ON c.user_id = u.id
-                    JOIN candidate_skills cs ON c.user_id = cs.candidate_id
+                    JOIN candidate_skills cs ON c.candidate_id = cs.candidate_id
                     JOIN skills s ON cs.skill_id = s.id
                     JOIN job_skills js ON s.id = js.skill_id
                     JOIN jobs j ON js.job_id = j.id

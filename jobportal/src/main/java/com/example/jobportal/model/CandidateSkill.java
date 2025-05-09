@@ -13,7 +13,7 @@ public class CandidateSkill {
     private CandidateSkillId id = new CandidateSkillId();
 
     @ManyToOne
-    // @MapsId("candidateId")
+    @MapsId("candidateId")
     private Candidate candidate;
 
     @ManyToOne
@@ -25,7 +25,7 @@ public class CandidateSkill {
     @Embeddable
     @Data
     public static class CandidateSkillId implements java.io.Serializable {
-        private Long candidateId;
+        private Long candidateId;  // Changed from userId
         private Long skillId;
     }
 }

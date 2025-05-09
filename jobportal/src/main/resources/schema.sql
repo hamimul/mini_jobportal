@@ -1,52 +1,74 @@
--- Create materialized view for job-candidate matches
-CREATE MATERIALIZED VIEW IF NOT EXISTS job_candidate_matches AS
-WITH job_requirements AS (
-    SELECT j.id AS job_id, j.location AS job_location, j.min_experience,
-           COUNT(js.skill_id) AS total_required_skills
-    FROM jobs j
-    LEFT JOIN job_skills js ON j.id = js.job_id
-    GROUP BY j.id, j.location, j.min_experience
-),
-candidate_skills AS (
-    SELECT j.id AS job_id, c.user_id AS candidate_id, u.name AS candidate_name,
-           c.location, c.years_experience, s.id AS skill_id,
-           cs.proficiency, js.importance
-    FROM candidates c
-    JOIN users u ON c.user_id = u.id
-    JOIN candidate_skills cs ON c.user_id = cs.candidate_id
-    JOIN skills s ON cs.skill_id = s.id
-    JOIN job_skills js ON s.id = js.skill_id
-    JOIN jobs j ON js.job_id = j.id
-),
-matching_skills AS (
-    SELECT cs.job_id, cs.candidate_id, cs.candidate_name, cs.location, cs.years_experience,
-           COUNT(cs.skill_id) AS matched_skills,
-           SUM(cs.proficiency * COALESCE(cs.importance, 0)) AS weighted_skill_score
-    FROM candidate_skills cs
-    GROUP BY cs.job_id, cs.candidate_id, cs.candidate_name, cs.location, cs.years_experience
-),
-candidate_scores AS (
-    SELECT ms.job_id, ms.candidate_id, ms.candidate_name, ms.location, ms.years_experience,
-           ms.matched_skills,
-           (ms.matched_skills * 1.0 / jr.total_required_skills) AS skill_coverage,
-           ms.weighted_skill_score,
-           CASE WHEN ms.location = jr.job_location THEN 10 ELSE 0 END AS location_bonus,
-           CASE
-               WHEN ms.years_experience < jr.min_experience
-               THEN (ms.years_experience * 1.0 / jr.min_experience) * 5
-               ELSE 5
-           END AS experience_score
-    FROM matching_skills ms
-    JOIN job_requirements jr ON ms.job_id = jr.job_id
-    WHERE ms.matched_skills * 1.0 / jr.total_required_skills >= 0.6
-)
-SELECT
-    job_id,
-    candidate_id,
-    candidate_name,
-    location,
-    years_experience,
-    (weighted_skill_score + location_bonus + experience_score) AS match_score,
-    RANK() OVER (PARTITION BY job_id
-               ORDER BY (weighted_skill_score + location_bonus + experience_score) DESC) AS rank
-FROM candidate_scores;
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS job_skills;
+DROP TABLE IF EXISTS candidate_skills;
+DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS employers;
+DROP TABLE IF EXISTS candidates;
+DROP TABLE IF EXISTS skills;
+DROP TABLE IF EXISTS users;
+
+-- Create tables
+CREATE TABLE users (
+                       id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                       name VARCHAR(255) NOT NULL,
+                       email VARCHAR(255) NOT NULL UNIQUE,
+                       type VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE candidates (
+                            candidate_id BIGINT PRIMARY KEY,
+                            user_id BIGINT NOT NULL,
+                            location VARCHAR(255),
+                            years_experience INT,
+                            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE employers (
+                           employer_id BIGINT PRIMARY KEY,
+                           user_id BIGINT NOT NULL,
+                           company_name VARCHAR(255) NOT NULL,
+                           industry VARCHAR(255),
+                           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE jobs (
+                      id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                      employer_id BIGINT NOT NULL,
+                      title VARCHAR(255) NOT NULL,
+                      location VARCHAR(255),
+                      min_experience INT,
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                      FOREIGN KEY (employer_id) REFERENCES employers(employer_id) ON DELETE CASCADE
+);
+
+CREATE TABLE skills (
+                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE candidate_skills (
+                                  candidate_id BIGINT NOT NULL,
+                                  skill_id BIGINT NOT NULL,
+                                  proficiency INT NOT NULL,
+                                  PRIMARY KEY (candidate_id, skill_id),
+                                  FOREIGN KEY (candidate_id) REFERENCES candidates(candidate_id) ON DELETE CASCADE,
+                                  FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+);
+
+CREATE TABLE job_skills (
+                            job_id BIGINT NOT NULL,
+                            skill_id BIGINT NOT NULL,
+                            importance INT NOT NULL,
+                            PRIMARY KEY (job_id, skill_id),
+                            FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+                            FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+);
+
+-- Create indexes for better performance
+CREATE INDEX idx_candidate_location ON candidates(location);
+CREATE INDEX idx_employer_company ON employers(company_name);
+CREATE INDEX idx_job_employer ON jobs(employer_id);
+CREATE INDEX idx_job_location ON jobs(location);
+CREATE INDEX idx_job_created_at ON jobs(created_at);
+CREATE INDEX idx_candidate_skill ON candidate_skills(candidate_id, skill_id);
+CREATE INDEX idx_job_skill ON job_skills(job_id, skill_id);
