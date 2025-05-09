@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(${employer.userId} ? 'Edit Employer' : 'Create Employer', ~{::div})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(${employer.employerId} ? 'Edit Employer' : 'Create Employer', ~{::div})}">
 <body>
 <div>
-    <h1 th:text="${employer.userId} ? 'Edit Employer' : 'Create Employer'">Create/Edit Employer</h1>
+    <h1 th:text="${employer.employerId} ? 'Edit Employer' : 'Create Employer'">Create/Edit Employer</h1>
 
     <div class="card">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0" th:text="${employer.userId} ? 'Edit Employer Details' : 'Enter Employer Details'">Employer Form</h5>
+            <h5 class="mb-0" th:text="${employer.employerId} ? 'Edit Employer Details' : 'Enter Employer Details'">Employer Form</h5>
         </div>
         <div class="card-body">
             <form th:action="@{/employers}" method="post" th:object="${employer}">
-                <input type="hidden" th:field="*{userId}" />
+                <input type="hidden" th:field="*{employerId}" />
 
-                <div class="mb-3" th:if="${employer.userId == null}">
-                    <label for="userId" class="form-label">User</label>
-                    <select class="form-select" id="userId" name="userId" required>
+                <div class="mb-3" th:if="${employer.employerId == null}">
+                    <label for="employerId" class="form-label">User</label>
+                    <select class="form-select" id="employerId" name="employerId" required>
                         <option value="">-- Select User --</option>
                         <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name + ' (' + user.email + ')'}"></option>
                     </select>
