@@ -41,8 +41,18 @@ public class EmployerController {
     }
 
     @PostMapping
-    public String saveEmployer(@ModelAttribute Employer employer, @RequestParam Long userId) {
-        employerService.save(employer, userId);
+    public String saveEmployer(@ModelAttribute Employer employer, @RequestParam(required = false) Long userId) {
+        if (employer.getEmployerId() == null) {
+            // Creating a new employer
+            if (userId == null) {
+                // Error handling - userId is required for new employers
+                return "redirect:/employers/create?error=userRequired";
+            }
+            employerService.save(employer, userId);
+        } else {
+            // Updating an existing employer
+            employerService.update(employer);
+        }
         return "redirect:/employers";
     }
 

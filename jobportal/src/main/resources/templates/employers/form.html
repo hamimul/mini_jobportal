@@ -10,11 +10,11 @@
         </div>
         <div class="card-body">
             <form th:action="@{/employers}" method="post" th:object="${employer}">
-                <input type="hidden" th:field="*{employerId}" />
+                <input type="hidden" th:field="*{employerId}" th:if="${employer.employerId != null}" />
 
                 <div class="mb-3" th:if="${employer.employerId == null}">
-                    <label for="employerId" class="form-label">User</label>
-                    <select class="form-select" id="employerId" name="employerId" required>
+                    <label for="userId" class="form-label">User</label>
+                    <select class="form-select" id="userId" name="userId" required>
                         <option value="">-- Select User --</option>
                         <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name + ' (' + user.email + ')'}"></option>
                     </select>

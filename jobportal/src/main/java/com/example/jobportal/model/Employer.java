@@ -23,6 +23,9 @@ public class Employer {
     private String companyName;
     private String industry;
 
+    @Version
+    private Long version; // Add this for optimistic locking
+
     @OneToMany(mappedBy = "employer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
 }
