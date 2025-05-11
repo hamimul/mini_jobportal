@@ -12,12 +12,18 @@
             <form th:action="@{/candidates}" method="post" th:object="${candidate}">
                 <input type="hidden" th:field="*{candidateId}" />
 
-                <div class="mb-3" th:if="${candidate.candidateId == null}">
-                    <label for="candidateId" class="form-label">User</label>
-                    <select class="form-select" id="candidateId" name="candidateId" required>
+                <div class="mb-3">
+                    <label for="userId" class="form-label">User</label>
+                    <select class="form-select" id="userId" name="userId" th:required="${candidate.candidateId == null}">
                         <option value="">-- Select User --</option>
-                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name + ' (' + user.email + ')'}"></option>
+                        <option th:each="user : ${users}"
+                                th:value="${user.id}"
+                                th:text="${user.name + ' (' + user.email + ')'}"
+                                th:selected="${candidate.candidateId != null and user.id == candidate.user.id}"></option>
                     </select>
+                    <small class="form-text text-muted" th:if="${candidate.candidateId != null}">
+                        Current user: <span th:text="${candidate.user.name}"></span>
+                    </small>
                 </div>
 
                 <div class="mb-3">
@@ -33,16 +39,18 @@
                 <div class="mb-3">
                     <label class="form-label">Skills</label>
                     <div id="skillsContainer">
-                        <!-- Skills will be added dynamically -->
+                        <!-- Existing skills for edit mode -->
                         <div th:each="skill, stat : *{skills}" class="row mb-2 skill-row">
+                            <input type="hidden" th:field="*{skills[__${stat.index}__].id.candidateId}" />
+                            <input type="hidden" th:field="*{skills[__${stat.index}__].id.skillId}" />
                             <div class="col-md-6">
-                                <select class="form-select skill-select" th:name="|skills[${stat.index}].skill.id|">
+                                <select class="form-select skill-select" th:field="*{skills[__${stat.index}__].skill.id}">
                                     <option value="">-- Select Skill --</option>
-                                    <!-- You'll need to populate this from the controller -->
+                                    <!-- Skills will be loaded via JavaScript -->
                                 </select>
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select" th:name="|skills[${stat.index}].proficiency|">
+                                <select class="form-select" th:field="*{skills[__${stat.index}__].proficiency}">
                                     <option value="1">1 - Basic</option>
                                     <option value="2">2 - Intermediate</option>
                                     <option value="3">3 - Advanced</option>
@@ -72,51 +80,75 @@
         const skillsContainer = document.getElementById('skillsContainer');
         const addSkillBtn = document.getElementById('addSkill');
 
+        // Function to load all skills and populate select
+        function loadSkills(selectElement) {
+            fetch('/api/skills')
+                .then(response => response.json())
+                .then(skills => {
+                    selectElement.innerHTML = '<option value="">-- Select Skill --</option>';
+                    skills.forEach(skill => {
+                        const option = document.createElement('option');
+                        option.value = skill.id;
+                        option.textContent = skill.name;
+                        selectElement.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading skills:', error);
+                    // Fallback: keep existing options
+                });
+        }
+
+        // Load skills for existing select elements
+        document.querySelectorAll('.skill-select').forEach(loadSkills);
+
         // Add skill row
         addSkillBtn.addEventListener('click', function() {
             const index = document.querySelectorAll('.skill-row').length;
             const row = document.createElement('div');
             row.className = 'row mb-2 skill-row';
             row.innerHTML = `
-                    <div class="col-md-6">
-                        <select class="form-select skill-select" name="skills[${index}].skill.id" required>
-                            <option value="">-- Select Skill --</option>
-                            <!-- You'll need to fetch skills via AJAX or have them in a hidden element -->
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-select" name="skills[${index}].proficiency" required>
-                            <option value="1">1 - Basic</option>
-                            <option value="2">2 - Intermediate</option>
-                            <option value="3">3 - Advanced</option>
-                            <option value="4">4 - Expert</option>
-                            <option value="5">5 - Master</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
-                    </div>
-                `;
+                <input type="hidden" name="skills[${index}].id.candidateId" value="">
+                <input type="hidden" name="skills[${index}].id.skillId" value="">
+                <div class="col-md-6">
+                    <select class="form-select skill-select" name="skills[${index}].skill.id" required>
+                        <option value="">-- Select Skill --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" name="skills[${index}].proficiency" required>
+                        <option value="1">1 - Basic</option>
+                        <option value="2">2 - Intermediate</option>
+                        <option value="3">3 - Advanced</option>
+                        <option value="4">4 - Expert</option>
+                        <option value="5">5 - Master</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
+                </div>
+            `;
             skillsContainer.appendChild(row);
 
-            // Fetch skills via AJAX
-            fetch('/api/skills')
-                .then(response => response.json())
-                .then(skills => {
-                    const select = row.querySelector('.skill-select');
-                    skills.forEach(skill => {
-                        const option = document.createElement('option');
-                        option.value = skill.id;
-                        option.textContent = skill.name;
-                        select.appendChild(option);
-                    });
-                });
+            // Load skills for the new select element
+            loadSkills(row.querySelector('.skill-select'));
         });
 
         // Remove skill row
         skillsContainer.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-skill')) {
                 e.target.closest('.skill-row').remove();
+                // Re-index remaining skill rows
+                document.querySelectorAll('.skill-row').forEach((row, newIndex) => {
+                    row.querySelectorAll('input, select').forEach(input => {
+                        if (input.name) {
+                            input.name = input.name.replace(/\[\d+\]/, `[${newIndex}]`);
+                        }
+                        if (input.id) {
+                            input.id = input.id.replace(/\d+/, newIndex);
+                        }
+                    });
+                });
             }
         });
     });

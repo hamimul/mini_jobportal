@@ -41,8 +41,18 @@ public class CandidateController {
     }
 
     @PostMapping
-    public String saveCandidate(@ModelAttribute Candidate candidate, @RequestParam Long userId) {
-        candidateService.save(candidate, userId);
+    public String saveCandidate(@ModelAttribute Candidate candidate,
+                                @RequestParam(name = "userId", required = false) Long userId) {
+        if (candidate.getCandidateId() == null) {
+            // Creating a new candidate
+            if (userId == null) {
+                return "redirect:/candidates/create?error=userRequired";
+            }
+            candidateService.save(candidate, userId);
+        } else {
+            // Updating an existing candidate
+            candidateService.save(candidate, userId);
+        }
         return "redirect:/candidates";
     }
 
@@ -54,7 +64,17 @@ public class CandidateController {
 
     @GetMapping("/{id}/edit")
     public String editCandidateForm(@PathVariable Long id, Model model) {
-        candidateService.findById(id).ifPresent(candidate -> model.addAttribute("candidate", candidate));
+        candidateService.findById(id).ifPresent(candidate -> {
+            model.addAttribute("candidate", candidate);
+            // Pre-select the current user in the dropdown
+            model.addAttribute("selectedUserId", candidate.getUser().getId());
+        });
+
+        // Add users for potential user change
+        List<User> candidateUsers = userService.findAll().stream()
+                .filter(user -> user.getType() == User.UserType.CANDIDATE)
+                .toList();
+        model.addAttribute("users", candidateUsers);
         return "candidates/form";
     }
 

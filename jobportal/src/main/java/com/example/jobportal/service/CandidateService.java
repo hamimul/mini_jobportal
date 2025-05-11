@@ -32,9 +32,46 @@ public class CandidateService {
 
     @Transactional
     public Candidate save(Candidate candidate, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        candidate.setUser(user);
+        if (candidate.getCandidateId() == null) {
+            // Creating a new candidate
+            if (userId == null) {
+                throw new IllegalArgumentException("User ID must be provided for new candidates");
+            }
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            candidate.setUser(user);
+        } else {
+            // Updating an existing candidate
+            Candidate existingCandidate = candidateRepository.findById(candidate.getCandidateId())
+                    .orElseThrow(() -> new RuntimeException("Candidate not found"));
+
+            // Keep the existing user relationship
+            candidate.setUser(existingCandidate.getUser());
+
+            // If userId is provided, use it (this allows changing the associated user)
+            if (userId != null) {
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+                candidate.setUser(user);
+            }
+        }
+
+        return candidateRepository.save(candidate);
+    }
+
+    @Transactional
+    public Candidate update(Candidate candidate) {
+        // For explicit updates without user change
+        if (candidate.getCandidateId() == null) {
+            throw new IllegalArgumentException("Candidate ID must be provided for updates");
+        }
+
+        Candidate existingCandidate = candidateRepository.findById(candidate.getCandidateId())
+                .orElseThrow(() -> new RuntimeException("Candidate not found"));
+
+        // Keep the existing user relationship
+        candidate.setUser(existingCandidate.getUser());
+
         return candidateRepository.save(candidate);
     }
 
