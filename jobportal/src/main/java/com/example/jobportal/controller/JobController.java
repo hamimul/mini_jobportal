@@ -32,7 +32,8 @@ public class JobController {
 
     @GetMapping("/create")
     public String createJobForm(Model model) {
-        model.addAttribute("job", new Job());
+        Job job = new Job();
+        model.addAttribute("job", job);
         model.addAttribute("employers", employerService.findAll());
         return "jobs/form";
     }
@@ -51,8 +52,11 @@ public class JobController {
 
     @GetMapping("/{id}/edit")
     public String editJobForm(@PathVariable Long id, Model model) {
-        jobService.findById(id).ifPresent(job -> model.addAttribute("job", job));
-        model.addAttribute("employers", employerService.findAll());
+        jobService.findById(id).ifPresent(job -> {
+            model.addAttribute("job", job);
+            // Pass employers for potential employer change (though usually not allowed)
+            model.addAttribute("employers", employerService.findAll());
+        });
         return "jobs/form";
     }
 
