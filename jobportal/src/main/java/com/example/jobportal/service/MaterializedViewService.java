@@ -28,7 +28,7 @@ public class MaterializedViewService {
     }
 
     @Transactional
-    @Scheduled(fixedRate = 3600000) // Refresh every hour
+//    @Scheduled(fixedRate = 3600000) // Refresh every hour
     public void refreshJobCandidateMatchesView() {
         try {
             // For MySQL, we'll drop and recreate the table

@@ -44,23 +44,23 @@
                 <a th:href="@{'/jobs/create'}" class="btn btn-sm btn-light">Post New Job</a>
             </div>
         </div>
-        <div class="card-body">
-            <div th:if="${employer.jobs.empty}" class="alert alert-info">
-                No job postings yet.
-            </div>
-            <div th:unless="${employer.jobs.empty}" class="list-group>
-                    <div th:unless="${employer.jobs.empty}" class="list-group">
-            <a th:each="job : ${employer.jobs}" th:href="@{'/jobs/' + ${job.id}}" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1" th:text="${job.title}">Job Title</h5>
-                    <small th:text="${job.location}">Location</small>
-                </div>
-                <p class="mb-1" th:text="'Experience required: ' + ${job.minExperience} + '+ years'">Experience required</p>
-                <small>
-                    <span th:each="skill : ${job.requiredSkills}" class="badge bg-info me-1" th:text="${skill.skill.name}">Skill</span>
-                </small>
-            </a>
-        </div>
+<!--        <div class="card-body">-->
+<!--            <div th:if="${employer.jobs.empty}" class="alert alert-info">-->
+<!--                No job postings yet.-->
+<!--            </div>-->
+<!--            <div th:unless="${employer.jobs.empty}" class="list-group>-->
+<!--                    <div th:unless="${employer.jobs.empty}" class="list-group">-->
+<!--            <a th:each="job : ${employer.jobs}" th:href="@{'/jobs/' + ${job.id}}" class="list-group-item list-group-item-action">-->
+<!--                <div class="d-flex w-100 justify-content-between">-->
+<!--                    <h5 class="mb-1" th:text="${job.title}">Job Title</h5>-->
+<!--                    <small th:text="${job.location}">Location</small>-->
+<!--                </div>-->
+<!--                <p class="mb-1" th:text="'Experience required: ' + ${job.minExperience} + '+ years'">Experience required</p>-->
+<!--                <small>-->
+<!--                    <span th:each="skill : ${job.requiredSkills}" class="badge bg-info me-1" th:text="${skill.skill.name}">Skill</span>-->
+<!--                </small>-->
+<!--            </a>-->
+<!--        </div>-->
     </div>
 </div>
 </body>
