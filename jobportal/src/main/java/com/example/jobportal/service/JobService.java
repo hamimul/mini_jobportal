@@ -2,6 +2,7 @@ package com.example.jobportal.service;
 
 import com.example.jobportal.model.Employer;
 import com.example.jobportal.model.Job;
+import com.example.jobportal.model.JobSkill;
 import com.example.jobportal.repository.EmployerRepository;
 import com.example.jobportal.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,40 @@ public class JobService {
         Employer employer = employerRepository.findById(employerId)
                 .orElseThrow(() -> new RuntimeException("Employer not found"));
         job.setEmployer(employer);
-        return jobRepository.save(job);
+
+        // First save the job to get the ID
+        Job savedJob = jobRepository.save(job);
+
+        // Update the job ID for all required skills
+        for (JobSkill skill : savedJob.getRequiredSkills()) {
+            skill.getId().setJobId(savedJob.getId());
+            skill.setJob(savedJob);
+        }
+
+        // Save again with updated skills
+        return jobRepository.save(savedJob);
+    }
+
+    @Transactional
+    public Job update(Job job) {
+        Job existingJob = jobRepository.findById(job.getId())
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Update fields
+        existingJob.setTitle(job.getTitle());
+        existingJob.setLocation(job.getLocation());
+        existingJob.setMinExperience(job.getMinExperience());
+
+        // Clear and update skills
+        existingJob.getRequiredSkills().clear();
+
+        for (JobSkill skill : job.getRequiredSkills()) {
+            skill.getId().setJobId(existingJob.getId());
+            skill.setJob(existingJob);
+            existingJob.getRequiredSkills().add(skill);
+        }
+
+        return jobRepository.save(existingJob);
     }
 
     public void deleteById(Long id) {

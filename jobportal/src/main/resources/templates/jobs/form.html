@@ -47,26 +47,30 @@
                 <div class="mb-3">
                     <label class="form-label">Required Skills</label>
                     <div id="skillsContainer">
-                        <!-- Existing skills for edit mode -->
-                        <div th:each="skill, stat : *{requiredSkills}" class="row mb-2 skill-row">
-                            <input type="hidden" th:field="*{requiredSkills[__${stat.index}__].id.jobId}" />
-                            <input type="hidden" th:field="*{requiredSkills[__${stat.index}__].id.skillId}" />
-                            <div class="col-md-6">
-                                <select class="form-select skill-select" th:field="*{requiredSkills[__${stat.index}__].skill.id}">
-                                    <option value="">-- Select Skill --</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-select" th:field="*{requiredSkills[__${stat.index}__].importance}">
-                                    <option value="1">1 - Nice to have</option>
-                                    <option value="2">2 - Helpful</option>
-                                    <option value="3">3 - Important</option>
-                                    <option value="4">4 - Very Important</option>
-                                    <option value="5">5 - Critical</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
+                        <!-- Skills will be added dynamically -->
+                        <div th:if="${job.id != null and !job.requiredSkills.empty}">
+                            <div th:each="jobSkill : ${job.requiredSkills}" class="row mb-2 skill-row">
+                                <div class="col-md-6">
+                                    <select class="form-select skill-select" name="skillIds" required>
+                                        <option value="">-- Select Skill --</option>
+                                        <option th:each="skill : ${skillsList}"
+                                                th:value="${skill.id}"
+                                                th:text="${skill.name}"
+                                                th:selected="${skill.id == jobSkill.skill.id}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select" name="skillImportance" required>
+                                        <option value="1" th:selected="${jobSkill.importance == 1}">1 - Nice to have</option>
+                                        <option value="2" th:selected="${jobSkill.importance == 2}">2 - Helpful</option>
+                                        <option value="3" th:selected="${jobSkill.importance == 3}">3 - Important</option>
+                                        <option value="4" th:selected="${jobSkill.importance == 4}">4 - Very Important</option>
+                                        <option value="5" th:selected="${jobSkill.importance == 5}">5 - Critical</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -81,87 +85,68 @@
         </div>
     </div>
 
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const skillsContainer = document.getElementById('skillsContainer');
-        const addSkillBtn = document.getElementById('addSkill');
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillsContainer = document.getElementById('skillsContainer');
+            const addSkillBtn = document.getElementById('addSkill');
 
-        // Function to load all skills and populate select
-        function loadSkills(selectElement) {
-            fetch('/api/skills')
-                .then(response => response.json())
-                .then(skills => {
-                    const currentValue = selectElement.value;
-                    selectElement.innerHTML = '<option value="">-- Select Skill --</option>';
-                    skills.forEach(skill => {
-                        const option = document.createElement('option');
-                        option.value = skill.id;
-                        option.textContent = skill.name;
-                        if (skill.id.toString() === currentValue) {
-                            option.selected = true;
-                        }
-                        selectElement.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading skills:', error);
+            // Skills list from the server
+            const availableSkills = /*[[${skillsList}]]*/ [];
+
+            // Function to create a skill row
+            function createSkillRow(selectedSkillId = null, selectedImportance = 1) {
+                const row = document.createElement('div');
+                row.className = 'row mb-2 skill-row';
+
+                let skillOptions = '<option value="">-- Select Skill --</option>';
+                availableSkills.forEach(skill => {
+                    const selected = skill.id == selectedSkillId ? 'selected' : '';
+                    skillOptions += `<option value="${skill.id}" ${selected}>${skill.name}</option>`;
                 });
-        }
 
-        // Load skills for existing select elements
-        document.querySelectorAll('.skill-select').forEach(loadSkills);
-
-        // Add skill row
-        addSkillBtn.addEventListener('click', function() {
-            const index = document.querySelectorAll('.skill-row').length;
-            const row = document.createElement('div');
-            row.className = 'row mb-2 skill-row';
-            row.innerHTML = `
-                <input type="hidden" name="requiredSkills[${index}].id.jobId" value="">
-                <input type="hidden" name="requiredSkills[${index}].id.skillId" value="">
+                row.innerHTML = `
                 <div class="col-md-6">
-                    <select class="form-select skill-select" name="requiredSkills[${index}].skill.id" required>
-                        <option value="">-- Select Skill --</option>
+                    <select class="form-select skill-select" name="skillIds" required>
+                        ${skillOptions}
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <select class="form-select" name="requiredSkills[${index}].importance" required>
-                        <option value="1">1 - Nice to have</option>
-                        <option value="2">2 - Helpful</option>
-                        <option value="3">3 - Important</option>
-                        <option value="4">4 - Very Important</option>
-                        <option value="5">5 - Critical</option>
+                    <select class="form-select" name="skillImportance" required>
+                        <option value="1" ${selectedImportance == 1 ? 'selected' : ''}>1 - Nice to have</option>
+                        <option value="2" ${selectedImportance == 2 ? 'selected' : ''}>2 - Helpful</option>
+                        <option value="3" ${selectedImportance == 3 ? 'selected' : ''}>3 - Important</option>
+                        <option value="4" ${selectedImportance == 4 ? 'selected' : ''}>4 - Very Important</option>
+                        <option value="5" ${selectedImportance == 5 ? 'selected' : ''}>5 - Critical</option>
                     </select>
                 </div>
                 <div class="col-md-2">
                     <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
                 </div>
             `;
-            skillsContainer.appendChild(row);
 
-            // Load skills for the new select element
-            loadSkills(row.querySelector('.skill-select'));
-        });
+                return row;
+            }
 
-        // Remove skill row
-        skillsContainer.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-skill')) {
-                e.target.closest('.skill-row').remove();
-                // Re-index remaining skill rows
-                document.querySelectorAll('.skill-row').forEach((row, newIndex) => {
-                    row.querySelectorAll('input, select').forEach(input => {
-                        if (input.name) {
-                            input.name = input.name.replace(/\[\d+\]/, `[${newIndex}]`);
-                        }
-                        if (input.id) {
-                            input.id = input.id.replace(/\d+/, newIndex);
-                        }
-                    });
-                });
+            // Add skill row
+            addSkillBtn.addEventListener('click', function() {
+                const row = createSkillRow();
+                skillsContainer.appendChild(row);
+            });
+
+            // Remove skill row
+            skillsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-skill')) {
+                    e.target.closest('.skill-row').remove();
+                }
+            });
+
+            // If this is a new job and there are no skills, add one empty row
+            const existingRows = skillsContainer.querySelectorAll('.skill-row');
+            if (existingRows.length === 0) {
+                skillsContainer.appendChild(createSkillRow());
             }
         });
-    });
-</script>
+    </script>
 </div>
 
 </body>

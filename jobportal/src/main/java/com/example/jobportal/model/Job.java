@@ -31,11 +31,16 @@ public class Job {
     private Integer minExperience;
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<JobSkill> requiredSkills = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    // Constructor
+    public Job() {
+        this.requiredSkills = new HashSet<>();
     }
 }
