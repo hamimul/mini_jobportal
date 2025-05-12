@@ -1,4 +1,5 @@
--- Drop existing tables if they exist
+-- Drop existing tables if they exist (in correct order due to foreign keys)
+DROP TABLE IF EXISTS job_candidate_matches;
 DROP TABLE IF EXISTS job_skills;
 DROP TABLE IF EXISTS candidate_skills;
 DROP TABLE IF EXISTS jobs;
@@ -20,6 +21,7 @@ CREATE TABLE candidates (
                             user_id BIGINT NOT NULL,
                             location VARCHAR(255),
                             years_experience INT,
+                            version BIGINT DEFAULT 0,
                             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -28,6 +30,7 @@ CREATE TABLE employers (
                            user_id BIGINT NOT NULL,
                            company_name VARCHAR(255) NOT NULL,
                            industry VARCHAR(255),
+                           version BIGINT DEFAULT 0,
                            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

@@ -4,155 +4,157 @@
 <div>
     <h1 th:text="${candidate.candidateId} ? 'Edit Candidate' : 'Create Candidate'">Create/Edit Candidate</h1>
 
+    <!-- Error and Success Messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <div class="card">
         <div class="card-header bg-success text-white">
             <h5 class="mb-0" th:text="${candidate.candidateId} ? 'Edit Candidate Details' : 'Enter Candidate Details'">Candidate Form</h5>
         </div>
         <div class="card-body">
-            <form th:action="@{/candidates}" method="post" th:object="${candidate}">
-                <input type="hidden" th:field="*{candidateId}" />
+            <form th:action="@{/candidates}" method="post">
+                <input type="hidden" name="candidateId" th:value="${candidate.candidateId}" />
 
-                <div class="mb-3">
-                    <label for="userId" class="form-label">User</label>
-                    <select class="form-select" id="userId" name="userId" th:required="${candidate.candidateId == null}">
+                <div class="mb-3" th:if="${candidate.candidateId == null}">
+                    <label for="userId" class="form-label">User <span class="text-danger">*</span></label>
+                    <select class="form-select" id="userId" name="userId" required>
                         <option value="">-- Select User --</option>
                         <option th:each="user : ${users}"
                                 th:value="${user.id}"
-                                th:text="${user.name + ' (' + user.email + ')'}"
-                                th:selected="${candidate.candidateId != null and user.id == candidate.user.id}"></option>
+                                th:text="${user.name + ' (' + user.email + ')'}"></option>
                     </select>
-                    <small class="form-text text-muted" th:if="${candidate.candidateId != null}">
-                        Current user: <span th:text="${candidate.user.name}"></span>
-                    </small>
+                </div>
+
+                <div class="mb-3" th:if="${candidate.candidateId != null}">
+                    <label class="form-label">User</label>
+                    <p class="form-control-plaintext">
+                        <strong th:text="${candidate.user?.name}">User Name</strong>
+                        (<span th:text="${candidate.user?.email}">email@example.com</span>)
+                    </p>
                 </div>
 
                 <div class="mb-3">
-                    <label for="location" class="form-label">Location</label>
-                    <input type="text" class="form-control" id="location" th:field="*{location}" required>
+                    <label for="location" class="form-label">Location <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="location" name="location"
+                           th:value="${candidate.location}" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="yearsExperience" class="form-label">Years of Experience</label>
-                    <input type="number" class="form-control" id="yearsExperience" th:field="*{yearsExperience}" min="0" required>
+                    <label for="yearsExperience" class="form-label">Years of Experience <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="yearsExperience" name="yearsExperience"
+                           th:value="${candidate.yearsExperience}" min="0" required>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Skills</label>
                     <div id="skillsContainer">
-                        <!-- Existing skills for edit mode -->
-                        <div th:each="skill, stat : *{skills}" class="row mb-2 skill-row">
-                            <input type="hidden" th:field="*{skills[__${stat.index}__].id.candidateId}" />
-                            <input type="hidden" th:field="*{skills[__${stat.index}__].id.skillId}" />
-                            <div class="col-md-6">
-                                <select class="form-select skill-select" th:field="*{skills[__${stat.index}__].skill.id}">
-                                    <option value="">-- Select Skill --</option>
-                                    <!-- Skills will be loaded via JavaScript -->
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-select" th:field="*{skills[__${stat.index}__].proficiency}">
-                                    <option value="1">1 - Basic</option>
-                                    <option value="2">2 - Intermediate</option>
-                                    <option value="3">3 - Advanced</option>
-                                    <option value="4">4 - Expert</option>
-                                    <option value="5">5 - Master</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
-                            </div>
-                        </div>
+                        <!-- Skills will be populated dynamically -->
                     </div>
-                    <button type="button" id="addSkill" class="btn btn-info btn-sm mt-2">Add Skill</button>
+                    <button type="button" id="addSkill" class="btn btn-info btn-sm mt-2">
+                        <i class="bi bi-plus-circle"></i> Add Skill
+                    </button>
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a href="/candidates" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-success">Save</button>
+                    <a href="/candidates" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Save Candidate
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const skillsContainer = document.getElementById('skillsContainer');
-        const addSkillBtn = document.getElementById('addSkill');
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillsContainer = document.getElementById('skillsContainer');
+            const addSkillBtn = document.getElementById('addSkill');
 
-        // Function to load all skills and populate select
-        function loadSkills(selectElement) {
-            fetch('/api/skills')
-                .then(response => response.json())
-                .then(skills => {
-                    selectElement.innerHTML = '<option value="">-- Select Skill --</option>';
-                    skills.forEach(skill => {
-                        const option = document.createElement('option');
-                        option.value = skill.id;
-                        option.textContent = skill.name;
-                        selectElement.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error loading skills:', error);
-                    // Fallback: keep existing options
+            // Data from server
+            const candidateSkills = /*[[${candidate.skills}]]*/ [];
+            const availableSkills = /*[[${skillsList}]]*/ [];
+            const isEdit = /*[[${candidate.candidateId != null}]]*/ false;
+
+            // Initialize skill counter
+            let skillCounter = 0;
+
+            // Create skill option HTML
+            function createSkillOptions(selectedId) {
+                let options = '<option value="">-- Select Skill --</option>';
+                availableSkills.forEach(skill => {
+                    const selected = skill.id == selectedId ? 'selected' : '';
+                    options += `<option value="${skill.id}" ${selected}>${skill.name}</option>`;
                 });
-        }
+                return options;
+            }
 
-        // Load skills for existing select elements
-        document.querySelectorAll('.skill-select').forEach(loadSkills);
+            // Create skill row
+            function createSkillRow(skillId = '', proficiency = 1) {
+                const rowId = `skill-row-${skillCounter++}`;
+                const row = document.createElement('div');
+                row.className = 'row mb-2 skill-row';
+                row.id = rowId;
 
-        // Add skill row
-        addSkillBtn.addEventListener('click', function() {
-            const index = document.querySelectorAll('.skill-row').length;
-            const row = document.createElement('div');
-            row.className = 'row mb-2 skill-row';
-            row.innerHTML = `
-                <input type="hidden" name="skills[${index}].id.candidateId" value="">
-                <input type="hidden" name="skills[${index}].id.skillId" value="">
-                <div class="col-md-6">
-                    <select class="form-select skill-select" name="skills[${index}].skill.id" required>
-                        <option value="">-- Select Skill --</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <select class="form-select" name="skills[${index}].proficiency" required>
-                        <option value="1">1 - Basic</option>
-                        <option value="2">2 - Intermediate</option>
-                        <option value="3">3 - Advanced</option>
-                        <option value="4">4 - Expert</option>
-                        <option value="5">5 - Master</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger btn-sm remove-skill">Remove</button>
-                </div>
-            `;
-            skillsContainer.appendChild(row);
+                row.innerHTML = `
+            <div class="col-md-5">
+                <select class="form-select" name="skillIds" required>
+                    ${createSkillOptions(skillId)}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <select class="form-select" name="proficiencies" required>
+                    <option value="1" ${proficiency == 1 ? 'selected' : ''}>1 - Basic</option>
+                    <option value="2" ${proficiency == 2 ? 'selected' : ''}>2 - Intermediate</option>
+                    <option value="3" ${proficiency == 3 ? 'selected' : ''}>3 - Advanced</option>
+                    <option value="4" ${proficiency == 4 ? 'selected' : ''}>4 - Expert</option>
+                    <option value="5" ${proficiency == 5 ? 'selected' : ''}>5 - Master</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeSkillRow('${rowId}')">
+                    <i class="bi bi-trash"></i> Remove
+                </button>
+            </div>
+        `;
 
-            // Load skills for the new select element
-            loadSkills(row.querySelector('.skill-select'));
-        });
+                return row;
+            }
 
-        // Remove skill row
-        skillsContainer.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-skill')) {
-                e.target.closest('.skill-row').remove();
-                // Re-index remaining skill rows
-                document.querySelectorAll('.skill-row').forEach((row, newIndex) => {
-                    row.querySelectorAll('input, select').forEach(input => {
-                        if (input.name) {
-                            input.name = input.name.replace(/\[\d+\]/, `[${newIndex}]`);
-                        }
-                        if (input.id) {
-                            input.id = input.id.replace(/\d+/, newIndex);
-                        }
-                    });
+            // Add skill row
+            addSkillBtn.addEventListener('click', function() {
+                const row = createSkillRow();
+                skillsContainer.appendChild(row);
+            });
+
+            // Remove skill row
+            window.removeSkillRow = function(rowId) {
+                const row = document.getElementById(rowId);
+                if (row) {
+                    row.remove();
+                }
+            };
+
+            // Load existing skills if editing
+            if (isEdit && candidateSkills && candidateSkills.length > 0) {
+                candidateSkills.forEach(skill => {
+                    const row = createSkillRow(skill.skill.id, skill.proficiency);
+                    skillsContainer.appendChild(row);
                 });
             }
         });
-    });
-</script>
+        /*]]>*/
+    </script>
 </div>
-
 </body>
 </html>
