@@ -62,8 +62,8 @@
         <div class="card-body">
             <p><strong>Industry:</strong> <span th:text="${job.employer.industry}">Software Development</span></p>
             <p><strong>Contact:</strong> <span th:text="${job.employer.user.email}">hr@example.com</span></p>
-            <a th:href="@{'/employers/' + ${job.employer.userId}}" class="btn btn-outline-primary">View Company Profile</a>
-            <a th:href="@{'/jobs/employer/' + ${job.employer.userId}}" class="btn btn-outline-info">View Other Jobs</a>
+            <a th:href="@{'/employers/' + ${job.employer.employerId}}" class="btn btn-outline-primary">View Company Profile</a>
+            <a th:href="@{'/jobs/employer/' + ${job.employer.employerId}}" class="btn btn-outline-info">View Other Jobs</a>
         </div>
     </div>
 </div>
