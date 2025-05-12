@@ -4,10 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
 @Getter
 @Setter
 @ToString(exclude = {"job", "skill"})
+@EqualsAndHashCode
 @Entity
 @Table(name = "job_skills", indexes = {
         @Index(name = "idx_job_skill", columnList = "job_id, skill_id")
@@ -17,50 +19,24 @@ public class JobSkill {
     private JobSkillId id = new JobSkillId();
 
     @ManyToOne
-    @MapsId("jobId")
+    @JoinColumn(name = "job_id", insertable = false, updatable = false)
     private Job job;
 
     @ManyToOne
-    @MapsId("skillId")
+    @JoinColumn(name = "skill_id", insertable = false, updatable = false)
     private Skill skill;
 
     private Integer importance; // 1-5
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JobSkill)) return false;
-        JobSkill jobSkill = (JobSkill) o;
-        return id != null && id.equals(jobSkill.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-
     @Embeddable
     @Getter
     @Setter
+    @EqualsAndHashCode
     public static class JobSkillId implements java.io.Serializable {
+        @Column(name = "job_id")
         private Long jobId;
+
+        @Column(name = "skill_id")
         private Long skillId;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof JobSkillId)) return false;
-            JobSkillId that = (JobSkillId) o;
-            return jobId != null && skillId != null 
-                   && jobId.equals(that.jobId) 
-                   && skillId.equals(that.skillId);
-        }
-
-        @Override
-        public int hashCode() {
-            return jobId != null && skillId != null ? 
-                   31 * jobId.hashCode() + skillId.hashCode() : 
-                   super.hashCode();
-        }
     }
 }

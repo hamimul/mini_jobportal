@@ -1,12 +1,15 @@
 package com.example.jobportal.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "skills", indexes = {
         @Index(name = "idx_skill_name", columnList = "name", unique = true)

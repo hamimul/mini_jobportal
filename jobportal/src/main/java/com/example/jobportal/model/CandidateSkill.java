@@ -1,9 +1,15 @@
 package com.example.jobportal.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
 
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"candidate", "skill"})
+@EqualsAndHashCode
 @Entity
 @Table(name = "candidate_skills", indexes = {
         @Index(name = "idx_candidate_skill", columnList = "candidate_id, skill_id")
@@ -13,19 +19,24 @@ public class CandidateSkill {
     private CandidateSkillId id = new CandidateSkillId();
 
     @ManyToOne
-    @MapsId("candidateId")
+    @JoinColumn(name = "candidate_id", insertable = false, updatable = false)
     private Candidate candidate;
 
     @ManyToOne
-    @MapsId("skillId")
+    @JoinColumn(name = "skill_id", insertable = false, updatable = false)
     private Skill skill;
 
     private Integer proficiency; // 1-5
 
     @Embeddable
-    @Data
+    @Getter
+    @Setter
+    @EqualsAndHashCode
     public static class CandidateSkillId implements java.io.Serializable {
-        private Long candidateId;  // Changed from userId
+        @Column(name = "candidate_id")
+        private Long candidateId;
+
+        @Column(name = "skill_id")
         private Long skillId;
     }
 }

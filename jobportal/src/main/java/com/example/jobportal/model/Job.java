@@ -1,13 +1,16 @@
 package com.example.jobportal.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "jobs", indexes = {
         @Index(name = "idx_job_employer", columnList = "employer_id"),
@@ -28,8 +31,8 @@ public class Job {
     private Integer minExperience;
     private LocalDateTime createdAt;
 
-    @ManyToMany
-    private Set<Skill> requiredSkills = new HashSet<>();  // Initialize here
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<JobSkill> requiredSkills = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

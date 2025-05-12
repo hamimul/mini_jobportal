@@ -1,12 +1,15 @@
 package com.example.jobportal.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "employers", indexes = {
         @Index(name = "idx_employer_company", columnList = "company_name")
@@ -24,7 +27,7 @@ public class Employer {
     private String industry;
 
     @Version
-    private Long version; // Add this for optimistic locking
+    private Long version;
 
     @OneToMany(mappedBy = "employer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Job> jobs = new ArrayList<>();
