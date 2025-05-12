@@ -28,8 +28,8 @@ public class Job {
     private Integer minExperience;
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<JobSkill> requiredSkills = new HashSet<>();
+    @ManyToMany
+    private Set<Skill> requiredSkills = new HashSet<>();  // Initialize here
 
     @PrePersist
     protected void onCreate() {

@@ -24,7 +24,8 @@ public class MainController {
     public String home(Model model) {
         // Get latest jobs (limited to 5)
         List<Job> latestJobs = jobService.findAll().stream()
-                .sorted(Comparator.comparing(Job::getCreatedAt).reversed())
+                .filter(job -> job.getCreatedAt() != null) // Filter out jobs with null createdAt
+                .sorted(Comparator.comparing(Job::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
                 .limit(5)
                 .collect(Collectors.toList());
 
