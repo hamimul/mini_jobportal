@@ -1,6 +1,8 @@
 package com.example.jobportal.controller;
 
 import com.example.jobportal.dto.CandidateMatchDTO;
+import com.example.jobportal.dto.JobMatchDTO;
+import com.example.jobportal.service.CandidateService;
 import com.example.jobportal.service.EmployerService;
 import com.example.jobportal.service.JobService;
 import com.example.jobportal.service.MatchmakingService;
@@ -19,15 +21,18 @@ public class MatchmakingController {
     private final MatchmakingService matchmakingService;
     private final JobService jobService;
     private final EmployerService employerService;
+    private final CandidateService candidateService;
 
     @Autowired
     public MatchmakingController(
             MatchmakingService matchmakingService,
             JobService jobService,
-            EmployerService employerService) {
+            EmployerService employerService,
+            CandidateService candidateService) {
         this.matchmakingService = matchmakingService;
         this.jobService = jobService;
         this.employerService = employerService;
+        this.candidateService = candidateService;
     }
 
     @GetMapping("/jobs/{jobId}")
@@ -73,5 +78,13 @@ public class MatchmakingController {
         employerService.findById(employerId).ifPresent(employer -> model.addAttribute("employer", employer));
         model.addAttribute("topMatches", topMatches);
         return "matching/employer-dashboard";
+    }
+
+    @GetMapping("/candidates/{candidateId}")
+    public String showCandidateMatches(@PathVariable Long candidateId, Model model) {
+        List<JobMatchDTO> matchingJobs = matchmakingService.findMatchingJobsForCandidate(candidateId);
+        candidateService.findById(candidateId).ifPresent(candidate -> model.addAttribute("candidate", candidate));
+        model.addAttribute("matchingJobs", matchingJobs);
+        return "matching/candidate-matches";
     }
 }

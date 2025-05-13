@@ -1,6 +1,7 @@
 package com.example.jobportal.repository;
 
 import com.example.jobportal.dto.CandidateMatchDTO;
+import com.example.jobportal.dto.JobMatchDTO;
 import java.util.List;
 import java.util.Map;
 
@@ -12,4 +13,5 @@ public interface JobMatchRepository {
             Integer page,
             Integer size,
             Map<String, String> filters);
+    List<JobMatchDTO> findMatchingJobsForCandidate(Long candidateId);
 }

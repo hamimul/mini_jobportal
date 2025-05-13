@@ -1,6 +1,7 @@
 package com.example.jobportal.repository.impl;
 
 import com.example.jobportal.dto.CandidateMatchDTO;
+import com.example.jobportal.dto.JobMatchDTO;
 import com.example.jobportal.repository.JobMatchRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -277,6 +278,76 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
                         ((Number) row[3]).intValue(),
                         ((Number) row[4]).doubleValue(),
                         ((Number) row[5]).intValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<JobMatchDTO> findMatchingJobsForCandidate(Long candidateId) {
+        String sql = """
+            WITH candidate_info AS (
+                SELECT c.candidate_id, c.location AS candidate_location, c.years_experience,
+                       COUNT(cs.skill_id) AS total_skills
+                FROM candidates c
+                LEFT JOIN candidate_skills cs ON c.candidate_id = cs.candidate_id
+                WHERE c.candidate_id = :candidateId
+                GROUP BY c.candidate_id, c.location, c.years_experience
+            ),
+            job_skills_match AS (
+                SELECT j.id AS job_id, j.title AS job_title, e.company_name, j.location,
+                       j.min_experience, COUNT(js.skill_id) AS total_required_skills,
+                       COUNT(cs.skill_id) AS matched_skills,
+                       SUM(cs.proficiency * COALESCE(js.importance, 0)) AS weighted_skill_score
+                FROM jobs j
+                JOIN employers e ON j.employer_id = e.employer_id
+                LEFT JOIN job_skills js ON j.id = js.job_id
+                LEFT JOIN candidate_skills cs ON js.skill_id = cs.skill_id AND cs.candidate_id = :candidateId
+                GROUP BY j.id, j.title, e.company_name, j.location, j.min_experience
+            ),
+            job_scores AS (
+                SELECT jsm.job_id, jsm.job_title, jsm.company_name, jsm.location,
+                       jsm.min_experience, jsm.matched_skills, jsm.total_required_skills,
+                       jsm.weighted_skill_score,
+                       CASE WHEN jsm.matched_skills > 0 THEN
+                           (jsm.matched_skills * 1.0 / jsm.total_required_skills)
+                       ELSE 0 END AS skill_coverage,
+                       CASE WHEN jsm.location = ci.candidate_location THEN 10 ELSE 0 END AS location_bonus,
+                       CASE 
+                           WHEN ci.years_experience < jsm.min_experience 
+                           THEN (ci.years_experience * 1.0 / jsm.min_experience) * 5
+                           ELSE 5
+                       END AS experience_score
+                FROM job_skills_match jsm
+                CROSS JOIN candidate_info ci
+                WHERE jsm.total_required_skills > 0
+            ),
+            final_scores AS (
+                SELECT job_id, job_title, company_name, location, min_experience,
+                       (weighted_skill_score + location_bonus + experience_score) AS match_score,
+                       RANK() OVER (ORDER BY (weighted_skill_score + location_bonus + experience_score) DESC) AS rank_num
+                FROM job_scores
+                WHERE skill_coverage >= 0.4  -- Lower threshold for candidate view
+            )
+            SELECT job_id, job_title, company_name, location, min_experience, match_score, rank_num
+            FROM final_scores
+            ORDER BY rank_num
+            """;
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("candidateId", candidateId);
+
+        List<Object[]> results = query.getResultList();
+
+        return results.stream()
+                .map(row -> new JobMatchDTO(
+                        ((Number) row[0]).longValue(),
+                        (String) row[1],
+                        (String) row[2],
+                        (String) row[3],
+                        ((Number) row[4]).intValue(),
+                        ((Number) row[5]).doubleValue(),
+                        ((Number) row[6]).intValue()
                 ))
                 .collect(Collectors.toList());
     }

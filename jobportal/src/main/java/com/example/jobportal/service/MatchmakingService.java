@@ -1,6 +1,7 @@
 package com.example.jobportal.service;
 
 import com.example.jobportal.dto.CandidateMatchDTO;
+import com.example.jobportal.dto.JobMatchDTO;
 import com.example.jobportal.repository.JobMatchRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,5 +32,9 @@ public class MatchmakingService {
             Integer size,
             Map<String, String> filters) {
         return jobMatchRepository.findMatchingCandidatesWithPagination(jobId, page, size, filters);
+    }
+
+    public List<JobMatchDTO> findMatchingJobsForCandidate(Long candidateId) {
+        return jobMatchRepository.findMatchingJobsForCandidate(candidateId);
     }
 }

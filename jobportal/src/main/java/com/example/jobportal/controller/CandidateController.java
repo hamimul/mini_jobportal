@@ -2,9 +2,11 @@ package com.example.jobportal.controller;
 
 import com.example.jobportal.model.Candidate;
 import com.example.jobportal.model.User;
+import com.example.jobportal.dto.JobMatchDTO;
 import com.example.jobportal.service.CandidateService;
 import com.example.jobportal.service.SkillService;
 import com.example.jobportal.service.UserService;
+import com.example.jobportal.service.MatchmakingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,14 @@ public class CandidateController {
     private final CandidateService candidateService;
     private final UserService userService;
     private final SkillService skillService;
+    private final MatchmakingService matchmakingService;
 
     @Autowired
-    public CandidateController(CandidateService candidateService, UserService userService, SkillService skillService) {
+    public CandidateController(CandidateService candidateService, UserService userService, SkillService skillService, MatchmakingService matchmakingService) {
         this.candidateService = candidateService;
         this.userService = userService;
         this.skillService = skillService;
+        this.matchmakingService = matchmakingService;
     }
 
     @GetMapping
@@ -176,7 +180,12 @@ public class CandidateController {
 
     @GetMapping("/{id}")
     public String viewCandidate(@PathVariable Long id, Model model) {
-        candidateService.findById(id).ifPresent(candidate -> model.addAttribute("candidate", candidate));
+        candidateService.findById(id).ifPresent(candidate -> {
+            model.addAttribute("candidate", candidate);
+            // Get matching jobs for this candidate
+            List<JobMatchDTO> matchingJobs = matchmakingService.findMatchingJobsForCandidate(id);
+            model.addAttribute("matchingJobs", matchingJobs);
+        });
         return "candidates/view";
     }
 
