@@ -15,7 +15,7 @@
                     <p><strong>Industry:</strong> <span th:text="${employer.industry}"></span></p>
                     <p><strong>Contact:</strong> <span th:text="${employer.user.email}"></span></p>
                     <p><strong>Posted Jobs:</strong> <span th:text="${employer.jobs.size()}"></span></p>
-                    <a th:href="@{'/employers/' + ${employer.userId} + '/edit'}" class="btn btn-outline-primary">Edit Profile</a>
+                    <a th:href="@{'/employers/' + ${employer.employerId} + '/edit'}" class="btn btn-outline-primary">Edit Profile</a>
                 </div>
             </div>
 
@@ -25,7 +25,7 @@
                 </div>
                 <div class="card-body">
                     <a th:href="@{'/jobs/create'}" class="btn btn-success mb-2 w-100">Post New Job</a>
-                    <a th:href="@{'/jobs/employer/' + ${employer.userId}}" class="btn btn-outline-primary mb-2 w-100">View All Jobs</a>
+                    <a th:href="@{'/jobs/employer/' + ${employer.employerId}}" class="btn btn-outline-primary mb-2 w-100">View All Jobs</a>
                 </div>
             </div>
         </div>
