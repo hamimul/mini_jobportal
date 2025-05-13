@@ -233,12 +233,14 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
                        (weighted_skill_score + location_bonus + experience_score) AS match_score,
                        RANK() OVER (ORDER BY (weighted_skill_score + location_bonus + experience_score) DESC) AS rank
                 FROM candidate_scores
+            )
+            SELECT candidate_id, candidate_name, location, years_experience, match_score, rank
+            FROM final_scores
+            WHERE 1=1
             """);
 
-        // Apply filters
+        // Apply filters in the final SELECT, not in the CTE
         if (filters != null && !filters.isEmpty()) {
-            sqlBuilder.append(" WHERE 1=1 ");
-
             if (filters.containsKey("minScore")) {
                 sqlBuilder.append(" AND match_score >= :minScore ");
                 parameters.put("minScore", Double.parseDouble(filters.get("minScore")));
@@ -256,9 +258,6 @@ public class JobMatchRepositoryImpl implements JobMatchRepository {
         }
 
         sqlBuilder.append("""
-            )
-            SELECT candidate_id, candidate_name, location, years_experience, match_score, rank
-            FROM final_scores
             ORDER BY rank
             LIMIT :limit OFFSET :offset
             """);
