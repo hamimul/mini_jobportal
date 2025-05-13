@@ -1,64 +1,100 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Employer Profile', ~{::div})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout('Job Details', ~{::div})}">
 <body>
 <div>
-    <h1>Employer Profile</h1>
+    <h1>Job Details</h1>
 
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0" th:text="${employer.companyName}">Company Name</h5>
+            <h5 class="mb-0" th:text="${job.title}">Job Title</h5>
         </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Contact:</strong> <span th:text="${employer.user.name}"></span></p>
-                    <p><strong>Email:</strong> <span th:text="${employer.user.email}">email@example.com</span></p>
-                    <p><strong>Industry:</strong> <span th:text="${employer.industry}">Software Development</span></p>
+                    <p><strong>Company:</strong> <span th:text="${job.employer.companyName}">Company Name</span></p>
+                    <p><strong>Industry:</strong> <span th:text="${job.employer.industry}">Industry</span></p>
+                    <p><strong>Location:</strong> <span th:text="${job.location}">Location</span></p>
+                    <p><strong>Minimum Experience:</strong> <span th:text="${job.minExperience} + ' years'">5 years</span></p>
+                    <p><strong>Posted on:</strong> <span th:text="${#temporals.format(job.createdAt, 'MMM dd, yyyy')}">May 01, 2025</span></p>
                 </div>
                 <div class="col-md-6">
-                    <h5>Job Postings Summary</h5>
-                    <p><strong>Total Jobs:</strong> <span th:text="${employer.jobs.size()}">3</span></p>
-                    <a th:href="@{'/jobs/employer/' + ${employer.employerId}}" class="btn btn-outline-primary">View All Jobs</a>
-                    <a th:href="@{'/matching/employers/' + ${employer.employerId}}" class="btn btn-outline-info">Candidate Matches Dashboard</a>
+                    <h5>Required Skills</h5>
+                    <div th:if="${job.requiredSkills.empty}" class="alert alert-info">
+                        No skills specified for this job.
+                    </div>
+                    <div th:unless="${job.requiredSkills.empty}">
+                        <div class="mb-2" th:each="jobSkill : ${job.requiredSkills}">
+                            <div class="d-flex justify-content-between">
+                                <span th:text="${jobSkill.skill.name}">Skill Name</span>
+                                <div>
+                                    <span class="badge bg-primary" th:text="${jobSkill.importance} + '/5'">4/5</span>
+                                    <span class="badge"
+                                          th:classappend="${jobSkill.importance >= 4} ? 'bg-danger' : (${jobSkill.importance >= 3} ? 'bg-warning' : 'bg-info')"
+                                          th:text="${jobSkill.importance >= 4} ? 'Critical' : (${jobSkill.importance >= 3} ? 'Important' : 'Nice to have')">
+                                        Important
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="card-footer">
             <div class="d-flex justify-content-between">
-                <a href="/employers" class="btn btn-secondary">Back to List</a>
+                <a href="/jobs" class="btn btn-secondary">Back to Jobs</a>
                 <div>
-                    <a th:href="@{'/employers/' + ${employer.employerId} + '/edit'}" class="btn btn-warning">Edit</a>
-                    <a th:href="@{'/employers/' + ${employer.employerId} + '/delete'}" class="btn btn-danger"
-                       onclick="return confirm('Are you sure you want to delete this employer?')">Delete</a>
+                    <a th:href="@{'/matching/jobs/' + ${job.id}}" class="btn btn-success">View Matching Candidates</a>
+                    <a th:href="@{'/jobs/' + ${job.id} + '/edit'}" class="btn btn-warning">Edit</a>
+                    <a th:href="@{'/jobs/' + ${job.id} + '/delete'}" class="btn btn-danger"
+                       onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Jobs Section -->
-    <h3>Recent Job Postings</h3>
-    <div class="card">
+    <!-- Employer Information Section -->
+    <div class="card mb-4">
         <div class="card-header bg-info text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Jobs</h5>
-                <a th:href="@{'/jobs/create'}" class="btn btn-sm btn-light">Post New Job</a>
-            </div>
+            <h5 class="mb-0">About the Employer</h5>
         </div>
         <div class="card-body">
-            <div th:if="${employer.jobs.empty}" class="alert alert-info">
-                No job postings yet.
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Company Name:</strong> <span th:text="${job.employer.companyName}">Company Name</span></p>
+                    <p><strong>Industry:</strong> <span th:text="${job.employer.industry}">Industry</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Contact Person:</strong> <span th:text="${job.employer.user.name}">Contact Name</span></p>
+                    <p><strong>Email:</strong> <span th:text="${job.employer.user.email}">email@example.com</span></p>
+                </div>
             </div>
-            <div th:unless="${employer.jobs.empty}" class="list-group">
-                <a th:each="job : ${employer.jobs}" th:href="@{'/jobs/' + ${job.id}}" class="list-group-item list-group-item-action">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h5 class="mb-1" th:text="${job.title}">Job Title</h5>
-                        <small th:text="${job.location}">Location</small>
-                    </div>
-                    <p class="mb-1" th:text="'Experience required: ' + ${job.minExperience} + '+ years'">Experience required</p>
-                    <small>
-                        <span th:each="skill : ${job.requiredSkills}" class="badge bg-info me-1" th:text="${skill.skill.name}">Skill</span>
-                    </small>
-                </a>
+            <a th:href="@{'/employers/' + ${job.employer.employerId}}" class="btn btn-info">View Employer Profile</a>
+        </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Quick Actions</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <a th:href="@{'/matching/jobs/' + ${job.id}}" class="btn btn-success w-100 mb-2">
+                        <i class="bi bi-people"></i> View Matching Candidates
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a th:href="@{'/matching/jobs/' + ${job.id} + '/paged'}" class="btn btn-info w-100 mb-2">
+                        <i class="bi bi-filter"></i> Advanced Matching with Filters
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a th:href="@{'/jobs/employer/' + ${job.employer.employerId}}" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-building"></i> View All Company Jobs
+                    </a>
+                </div>
             </div>
         </div>
     </div>
