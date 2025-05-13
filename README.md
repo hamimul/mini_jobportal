@@ -103,9 +103,15 @@ Review candidates ranked by match score
 Use filters to refine the search
 View detailed candidate profiles
 
+
 Employer Dashboard
 
 Log in as an employer
 View the "Employer Dashboard"
 See top-matching candidates across all job postings
 View statistics and performance metrics
+
+Want deep overview ?
+
+Click the link below 
+https://deepwiki.com/hamimul/mini_jobportal
